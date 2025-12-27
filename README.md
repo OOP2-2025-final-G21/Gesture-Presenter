@@ -1,39 +1,54 @@
-# Gesture-Presenter
-## 1️⃣ テーマ決定
-テーマ名（仮）
-Gesture Presenter
-― カメラによるジェスチャー操作型プレゼン支援Webアプリ ―
-テーマ概要
-Webカメラで取得した手のジェスチャーを認識し、
-スライド操作（進む／戻る／強調表示など）を非接触で行える
-GUIプレゼン支援アプリケーションを開発する。  
+# React + TypeScript + Vite
 
-## 2️⃣ 機能一覧の洗い出し（初期〜完成まで）  
+This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
 
-🔹 初期フェーズ（最低限）
-- トップページ表示
-- プレゼン一覧表示（ダミー）
-- プレゼン操作画面遷移
-- カメラ映像表示（未認識でもOK）
-- DB接続確認  
+Currently, two official plugins are available:
 
-🔹 基本機能
-- プレゼンをアップロード，保存(.pptxファイルを.pngファイルに変換)
-- スライド画像表示
-- 次／前スライド操作（ジェスチャー）
-- ジェスチャー検出（1〜2種類）  
+- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
+- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
 
-🔹 発展機能（後半）
-- 強調表示（ズーム・ハイライト）
-- 操作ログ保存
-- ジェスチャー感度調整
+## React Compiler
+      // Optionally, add this for stylistic rules
+      tseslint.configs.stylisticTypeChecked,
 
-## 3️⃣ 画面構成と画面遷移設計
-画面一覧
-- トップ（ダッシュボード）プレゼン追加
-- プレゼン操作画面(画像のみ表示)
-  
-### 役割分担
-- ジェスチャー読み取り
-- パワポファイルから画像ファイルに変換
-- 画像の表示，レイアウト
+      // Other configs...
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
+
+You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+
+```js
+// eslint.config.js
+import reactX from 'eslint-plugin-react-x'
+import reactDom from 'eslint-plugin-react-dom'
+
+export default defineConfig([
+  globalIgnores(['dist']),
+  {
+    files: ['**/*.{ts,tsx}'],
+    extends: [
+      // Other configs...
+      // Enable lint rules for React
+      reactX.configs['recommended-typescript'],
+      // Enable lint rules for React DOM
+      reactDom.configs.recommended,
+    ],
+    languageOptions: {
+      parserOptions: {
+        project: ['./tsconfig.node.json', './tsconfig.app.json'],
+        tsconfigRootDir: import.meta.dirname,
+      },
+      // other options...
+    },
+  },
+])
+```
