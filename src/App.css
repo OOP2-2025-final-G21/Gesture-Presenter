@@ -16,18 +16,23 @@ body {
 /* File Upload Screen */
 .file-upload-container {
   display: flex;
+  width: 100vw;
   height: 100vh;
   background-color: #ffffff;
+  overflow: hidden;
 }
 
 /* Left Column - Upload Area */
 .upload-section {
-  width: 50%;
+  width: 50vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   padding: 48px 40px;
   border-right: 1px solid #e5e7eb;
   overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .upload-section h1 {
@@ -133,12 +138,15 @@ body {
 
 /* Right Column - File List */
 .file-list-section {
-  width: 50%;
+  width: 50vw;
+  height: 100vh;
   display: flex;
   flex-direction: column;
   padding: 48px 40px;
   background-color: #ffffff;
   overflow-y: auto;
+  overflow-x: hidden;
+  box-sizing: border-box;
 }
 
 .file-list-section h2 {
