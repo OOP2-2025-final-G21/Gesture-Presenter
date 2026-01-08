@@ -3,11 +3,27 @@ import { useState, useRef } from 'react';
 import viteLogo from '/vite.svg';
 import reactLogo from './assets/react.svg';
 import HandDetector from './components/HandDetector';
+import GestureDebugPanel from './components/GestureDebugPanel';
 
 function App() {
   const [lastAction, setLastAction] = useState<string>('');
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const [gestureSettings, setGestureSettings] = useState({
+    swipeThreshold: 0.12,
+    swipeCooldown: 800,
+    pointerThrottle: 30,
+    smoothingAlpha: 0.6,
+    frameInterval: 100,
+    canvasScale: 1.0,
+    pointerMovementThreshold: 0.04,
+    requireIndexOnly: true,
+    enableThumbDirection: false,
+    thumbDirectionThreshold: 0.06,
+    thumbCooldown: 800,
+    invertHorizontal: true,
+    invertActions: true,
+  });
 
   const handleNext = () => {
     setLastAction('Next slide');
@@ -49,26 +65,8 @@ function App() {
             onNext={handleNext}
             onPrev={handlePrev}
             onPointerMove={handlePointerMove}
+            gestureSettings={gestureSettings}
           />
-
-          {/* pointer overlay inside detector container (maps normalized coords to container) */}
-          {pointer && (
-            <div
-              style={{
-                position: 'absolute',
-                left: `${Math.min(Math.max(pointer.x, 0), 1) * 100}%`,
-                top: `${Math.min(Math.max(pointer.y, 0), 1) * 100}%`,
-                transform: 'translate(-50%, -50%)',
-                width: 14,
-                height: 14,
-                borderRadius: 7,
-                background: 'rgba(255,0,0,0.9)',
-                pointerEvents: 'none',
-                boxShadow: '0 0 6px rgba(255,0,0,0.6)',
-                zIndex: 20,
-              }}
-            />
-          )}
         </div>
 
         <aside style={{ width: 300 }}>
@@ -94,6 +92,7 @@ function App() {
               <li>人差し指で指差しをして Pointer の値と赤いドットの追従を確認。</li>
             </ol>
           </div>
+          <GestureDebugPanel settings={gestureSettings} onChange={setGestureSettings} />
         </aside>
       </div>
     </div>
