@@ -6,9 +6,10 @@ export const FileUploadScreen = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = useState(false);
+  const [isDragActive, setIsDragActive] = useState(false);
+  const dragCounter = useRef(0);
 
-  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
-    const files = event.target.files;
+  const handleFiles = async (files: FileList | null) => {
     if (!files) return;
 
     setIsUploading(true);
@@ -74,6 +75,42 @@ export const FileUploadScreen = () => {
     }
   };
 
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    handleFiles(event.target.files);
+  };
+
+  const handleDragOver = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    e.dataTransfer.dropEffect = 'copy';
+  };
+
+  const handleDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current += 1;
+    setIsDragActive(true);
+  };
+
+  const handleDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounter.current -= 1;
+    if (dragCounter.current <= 0) {
+      setIsDragActive(false);
+      dragCounter.current = 0;
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent<HTMLDivElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
+    setIsDragActive(false);
+    dragCounter.current = 0;
+    const dt = e.dataTransfer;
+    handleFiles(dt.files);
+  };
+
   const handleStartPresentation = () => {
     if (slides.length === 0) {
       alert('スライドをアップロードしてください');
@@ -103,7 +140,13 @@ export const FileUploadScreen = () => {
               </p>
 
               {/* ドラッグアンドドロップ領域 */}
-              <div className="flex-1 border-2 border-dashed border-gray-300 rounded-lg p-12 text-center bg-white hover:bg-gray-50 transition flex flex-col items-center justify-center">
+              <div
+                onDragOver={handleDragOver}
+                onDragEnter={handleDragEnter}
+                onDragLeave={handleDragLeave}
+                onDrop={handleDrop}
+                className={`flex-1 border-2 border-dashed rounded-lg p-12 text-center bg-white hover:bg-gray-50 transition flex flex-col items-center justify-center ${isDragActive ? 'border-blue-400 bg-blue-50' : 'border-gray-300'}`}
+              >
                 <input
                   ref={fileInputRef}
                   type="file"
@@ -131,7 +174,7 @@ export const FileUploadScreen = () => {
                 </div>
 
                 <p className="text-gray-700 font-semibold mb-2">
-                  ここにドラッグ&ドロップ
+                  {isDragActive ? 'ここにファイルをドロップしてください' : 'ここにドラッグ&ドロップ'}
                 </p>
 
                 <button
