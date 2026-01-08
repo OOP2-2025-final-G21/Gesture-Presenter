@@ -39,30 +39,25 @@ function App() {
   };
 
   return (
-    <div className="flex flex-col h-screen bg-gray-100 pt-14">
+    <div className="relative h-screen w-screen bg-white flex flex-col align-items-center">
       {/* ===== ヘッダー ===== */}
-      <header className="h-14 bg-black flex items-center px-4 fixed top-0 left-0 w-full z-10">
-        {/* 左：終了ボタン */}
+      <div className="absolute h-[47px] left-0 top-0 w-full">
+        <div className="absolute bg-[#232323] bottom-0 left-1/2 top-0 -translate-x-1/2 w-full" />
+        <p className="absolute font-['Inter:Medium','Noto_Sans_JP:Medium',sans-serif] font-medium leading-normal left-1/2 text-[16px] text-center whitespace-nowrap text-white top-[calc(50%-9.5px)] -translate-x-1/2">
+          スライドタイトル
+        </p>
         <button
           onClick={endSlide}
-          className="px-3 py-1 bg-red-500 text-white rounded hover:bg-red-600"
+          className="absolute font-['Inter:Medium','Noto_Sans_JP:Medium',sans-serif] font-medium leading-normal left-[calc(50%-717px)] text-[16px] whitespace-nowrap text-white top-[calc(50%-424.5px)] hover:opacity-80"
         >
-          終了
+          スライド終了
         </button>
-
-        {/* 中央：タイトル */}
-        <div className="flex-1 text-center">
-          <h1 className="text-white font-semibold">
-            Gesture Presenter
-          </h1>
-        </div>
-      </header>
+      </div>
 
       {/* ===== メイン画面 ===== */}
       {!isRunning ? (
         // 開始画面
-        <div className="flex flex-col items-center justify-center flex-1 gap-6">
-          <h1 className="text-2xl font-bold">Gesture Presenter</h1>
+        <div className="flex items-center justify-center h-full bg-white">
           <button
             onClick={startSlide}
             className="px-6 py-3 bg-blue-500 text-white rounded hover:bg-blue-600"
