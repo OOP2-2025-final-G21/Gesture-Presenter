@@ -18,7 +18,7 @@ interface SlidesStore {
   removeAllSlides: () => void;
   
   // 再生制御
-  startPresentation: () => void;
+  startPresentation: (startIndex?: number) => void;
   endPresentation: () => void;
   nextSlide: () => void;
   previousSlide: () => void;
@@ -47,9 +47,9 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
     isPlaying: false,
   }),
 
-  startPresentation: () => set({
+  startPresentation: (startIndex = 0) => set({
     isPlaying: true,
-    currentSlideIndex: 0,
+    currentSlideIndex: startIndex,
   }),
 
   endPresentation: () => set({

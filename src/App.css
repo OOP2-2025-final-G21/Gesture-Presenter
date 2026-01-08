@@ -204,12 +204,19 @@ body {
   border-radius: 10px;
   transition: all 0.2s ease;
   position: relative;
+  cursor: pointer;
 }
 
 .file-item:hover {
   border-color: #d1d5db;
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
   background-color: #fafbfc;
+}
+
+.file-item.selected {
+  border-color: #3b82f6;
+  background-color: #eff6ff;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
 }
 
 .file-info {

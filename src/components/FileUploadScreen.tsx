@@ -7,6 +7,7 @@ export const FileUploadScreen = () => {
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
+  const [selectedSlideId, setSelectedSlideId] = useState<string | null>(null);
   const dragCounter = useRef(0);
 
   const handleFiles = async (files: FileList | null) => {
@@ -116,7 +117,12 @@ export const FileUploadScreen = () => {
       alert('スライドをアップロードしてください');
       return;
     }
-    startPresentation();
+    if (!selectedSlideId) {
+      alert('再生するスライドを選択してください');
+      return;
+    }
+    const selectedIndex = slides.findIndex((slide) => slide.id === selectedSlideId);
+    startPresentation(selectedIndex);
   };
 
   const handleUploadClick = () => {
@@ -179,7 +185,11 @@ export const FileUploadScreen = () => {
             </div>
           ) : (
             slides.map((slide, index) => (
-              <div key={slide.id} className="file-item">
+              <div
+                key={slide.id}
+                onClick={() => setSelectedSlideId(slide.id)}
+                className={`file-item ${selectedSlideId === slide.id ? 'selected' : ''}`}
+              >
                 <div className="file-info">
                   <div className="file-icon">📄</div>
                   <div className="file-details">
@@ -188,7 +198,13 @@ export const FileUploadScreen = () => {
                   </div>
                 </div>
                 <button
-                  onClick={() => removeSlide(slide.id)}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    removeSlide(slide.id);
+                    if (selectedSlideId === slide.id) {
+                      setSelectedSlideId(null);
+                    }
+                  }}
                   className="file-delete-btn"
                 >
                   ×
@@ -211,7 +227,7 @@ export const FileUploadScreen = () => {
         {/* 再生ボタン */}
         <button
           onClick={handleStartPresentation}
-          disabled={slides.length === 0}
+          disabled={!selectedSlideId}
           className="play-button"
         >
           <span>▶</span>
