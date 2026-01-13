@@ -60,31 +60,19 @@ export default function useGestureDetector(cb: Callbacks, opts?: Options) {
     for (const lm of landmarks) sumX += lm.x;
     const centerX = sumX / landmarks.length;
 
+    let dx: number | undefined = undefined;
     const buf = centersRef.current;
     buf.push({ x: centerX, t: now });
     if (buf.length > 30) buf.shift();
 
-    let dx: number | undefined = undefined;
-  if (buf.length >= 10) {
+    if (buf.length >= 10) {
       const k = 5;
       const recent = buf.slice(-k);
       const earlier = buf.slice(-2 * k, -k);
       const avgRecent = recent.reduce((s, v) => s + v.x, 0) / recent.length;
       const avgEarlier = earlier.reduce((s, v) => s + v.x, 0) / earlier.length;
-  dx = avgRecent - avgEarlier;
-  if (optsRef.current?.invertHorizontal) dx = -dx;
-      const SWIPE_THRESHOLD = optsRef.current?.swipeThreshold ?? 0.12;
-      const SWIPE_COOLDOWN = optsRef.current?.swipeCooldown ?? 800;
-      if (now - lastSwipeTime.current > SWIPE_COOLDOWN) {
-        const invert = !!optsRef.current?.invertActions;
-        if (dx > SWIPE_THRESHOLD) {
-          if (invert) cbRef.current.onPrev && cbRef.current.onPrev(); else cbRef.current.onNext && cbRef.current.onNext();
-          lastSwipeTime.current = now;
-        } else if (dx < -SWIPE_THRESHOLD) {
-          if (invert) cbRef.current.onNext && cbRef.current.onNext(); else cbRef.current.onPrev && cbRef.current.onPrev();
-          lastSwipeTime.current = now;
-        }
-      }
+      dx = avgRecent - avgEarlier;
+      if (optsRef.current?.invertHorizontal) dx = -dx;
     }
 
     // Thumb-direction based navigation
