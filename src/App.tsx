@@ -12,17 +12,17 @@ function App() {
   const [gestureSettings, setGestureSettings] = useState({
     swipeThreshold: 0.12,
     swipeCooldown: 800,
-    pointerThrottle: 30,
-    smoothingAlpha: 0.6,
+    pointerThrottle: 10,
+    smoothingAlpha: 0.60,
     frameInterval: 100,
     canvasScale: 1.0,
-    pointerMovementThreshold: 0.04,
+    pointerMovementThreshold: 0.120,
     requireIndexOnly: true,
-    enableThumbDirection: false,
-    thumbDirectionThreshold: 0.06,
+    enableThumbDirection: true,
+    thumbDirectionThreshold: 0.060,
     thumbCooldown: 800,
     invertHorizontal: true,
-    invertActions: true,
+    invertActions: false,
   });
 
   const handleNext = () => {
