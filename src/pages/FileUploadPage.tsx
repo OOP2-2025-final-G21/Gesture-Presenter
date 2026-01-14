@@ -61,10 +61,10 @@ export const FileUploadPage = () => {
           setUploadProgress((prev) => ({ ...prev, [fileId]: progress }));
         }
       };
-      
+
       reader.onload = (e) => {
         const imagePath = e.target?.result as string;
-        
+
         // スライドの画像パスを更新
         const slide = slides.find((s) => s.id === fileId);
         if (slide) {
@@ -209,7 +209,6 @@ export const FileUploadPage = () => {
             ) : (
               slides.map((slide, index) => {
                 const isLoading = uploadProgress[slide.id] !== undefined;
-                
                 return (
                   <div key={slide.id}>
                     {isLoading ? (
