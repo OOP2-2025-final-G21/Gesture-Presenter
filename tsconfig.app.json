@@ -5,6 +5,7 @@
     "useDefineForClassFields": true,
     "lib": ["ES2022", "DOM", "DOM.Iterable"],
     "module": "ESNext",
+  "jsx": "react-jsx",
     "types": ["vite/client"],
     "skipLibCheck": true,
 
@@ -13,8 +14,7 @@
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
     "moduleDetection": "force",
-    "noEmit": true,
-    "jsx": "react-jsx",
+  "noEmit": true,
 
     /* Linting */
     "strict": true,
