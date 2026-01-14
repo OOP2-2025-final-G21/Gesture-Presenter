@@ -2,7 +2,7 @@ import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSlidesStore } from '../store/slidesStore';
 
-export const FileUploadScreen = () => {
+export const FileUploadPage = () => {
   const navigate = useNavigate();
   const { slides, addSlide, startPresentation, removeSlide } = useSlidesStore();
   const fileInputRef = useRef<HTMLInputElement>(null);

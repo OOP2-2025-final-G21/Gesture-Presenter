@@ -2,7 +2,7 @@ import { useNavigate } from 'react-router-dom';
 import { useEffect, useState } from 'react';
 import { useSlidesStore } from '../store/slidesStore';
 
-export const PresentationScreen = () => {
+export const PresentationPage = () => {
   const navigate = useNavigate();
   const {
     slides,
