@@ -1,10 +1,21 @@
-# Gesture Presenter
+# プロモーション動画
+https://youtu.be/YMAnNdMtwL0
+
+# figmaリンク
+https://www.figma.com/design/XX9u44SLqC7UbhfjjQDAvv/%E3%82%AA%E3%83%96%E3%82%B7%E3%82%B3%E6%9C%80%E7%B5%82%E8%AA%B2%E9%A1%8C?node-id=0-1&t=goYKsPyLQZVb60zf-1
+
+# 概要画像
+<img width="2940" height="1850" alt="image" src="https://github.com/user-attachments/assets/b38513cd-d1f1-44e6-9ad7-b29b1670c571" />
+<img width="2940" height="1856" alt="image" src="https://github.com/user-attachments/assets/10b65936-8fab-4426-9153-701f8b9f848b" />
+<img width="2942" height="4824" alt="image" src="https://github.com/user-attachments/assets/ac21165e-af0a-4aaa-b1ab-46ffdb198416" />
+
+# AirSwipe
 
 シンプルなジェスチャー操作でスライドを操作するデモアプリです。
 MediaPipe Hands を利用してカメラ映像から手のランドマークを取得し、以下のジェスチャーを検出します。
 
-- 右スワイプ: 次のスライド
-- 左スワイプ: 前のスライド
+- 親指を立てて右: 次のスライド
+- 親指を立てて左: 前のスライド
 - 指差し (人差し指): 画面上のポインタを移動
 
 ## 必要条件
@@ -65,58 +76,4 @@ npx vitest run test/useGestureDetector.integration.test.ts
 - ブラウザ上での E2E テスト（Puppeteer / Playwright）を追加してカメラ許可と実動作を検証する。
 - パフォーマンス改善（video element + overlay canvas、フレームスロットル、canvas の内部解像度低減）を feature ブランチで実験し、安全な切り戻しを用意する。
 
----
 # React + TypeScript + Vite
-
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
-
-Currently, two official plugins are available:
-
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
-
-## React Compiler
-      // Optionally, add this for stylistic rules
-      tseslint.configs.stylisticTypeChecked,
-
-      // Other configs...
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
-
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
-
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
-
-export default defineConfig([
-  globalIgnores(['dist']),
-  {
-    files: ['**/*.{ts,tsx}'],
-    extends: [
-      // Other configs...
-      // Enable lint rules for React
-      reactX.configs['recommended-typescript'],
-      // Enable lint rules for React DOM
-      reactDom.configs.recommended,
-    ],
-    languageOptions: {
-      parserOptions: {
-        project: ['./tsconfig.node.json', './tsconfig.app.json'],
-        tsconfigRootDir: import.meta.dirname,
-      },
-      // other options...
-    },
-  },
-])
-```
