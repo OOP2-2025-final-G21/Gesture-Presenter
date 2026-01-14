@@ -190,6 +190,8 @@ body {
   justify-content: center;
   height: 100%;
   color: #9ca3af;
+
+#root {
   text-align: center;
   font-size: 14px;
 }
