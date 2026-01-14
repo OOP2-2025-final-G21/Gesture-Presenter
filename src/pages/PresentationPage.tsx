@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useSlidesStore } from '../store/slidesStore';
+import HandDetector from '../components/HandDetector';
 
 export const PresentationPage = () => {
   const navigate = useNavigate();
@@ -14,6 +15,9 @@ export const PresentationPage = () => {
   } = useSlidesStore();
 
   const [showHeader, setShowHeader] = useState(false);
+  const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
+  const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const pointerLastUpdateRef = useRef<number>(0);
 
   // スライドがない、または再生中でない場合はホームにリダイレクト
   useEffect(() => {
@@ -27,6 +31,72 @@ export const PresentationPage = () => {
     endPresentation();
     navigate('/');
   };
+
+  // ===== ジェスチャーハンドラー =====
+  const handleGestureNext = () => {
+    console.log('Gesture: Next slide');
+    nextSlide();
+  };
+
+  const handleGesturePrev = () => {
+    console.log('Gesture: Previous slide');
+    previousSlide();
+  };
+
+  const handlePointerMove = (p: { x: number; y: number }) => {
+    setPointer(p);
+    pointerLastUpdateRef.current = performance.now();
+  };
+
+  // ===== ポインター描画 =====
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    // キャンバスサイズを画面サイズに合わせる
+    const resizeCanvas = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+
+    let animationFrameId: number;
+
+    // アニメーションループ
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      const POINTER_TIMEOUT = 200; // 200ms更新がなければポインターを非表示
+      const isPointerActive = pointer && (performance.now() - pointerLastUpdateRef.current < POINTER_TIMEOUT);
+
+      if (isPointerActive) {
+        const px = (1 - pointer.x) * canvas.width;
+        const py = pointer.y * canvas.height;
+
+        // ポインター描画（最適化）
+        ctx.beginPath();
+        ctx.arc(px, py, 8, 0, Math.PI * 2);
+        ctx.fillStyle = 'rgba(255, 0, 0, 0.9)';
+        ctx.fill();
+        ctx.lineWidth = 2;
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.stroke();
+      }
+
+      animationFrameId = requestAnimationFrame(animate);
+    };
+
+    animationFrameId = requestAnimationFrame(animate);
+
+    return () => {
+      cancelAnimationFrame(animationFrameId);
+      window.removeEventListener('resize', resizeCanvas);
+    };
+  }, [pointer]);
 
   // ===== キーボード操作 =====
   useEffect(() => {
@@ -102,6 +172,45 @@ export const PresentationPage = () => {
           </div>
         </div>
       )}
+
+      {/* ===== ポインター表示用キャンバス ===== */}
+      <canvas
+        ref={canvasRef}
+        style={{
+          position: 'fixed',
+          top: 0,
+          left: 0,
+          width: '100%',
+          height: '100%',
+          pointerEvents: 'none',
+          zIndex: 100,
+        }}
+      />
+
+      {/* ===== ジェスチャー検出（非表示） ===== */}
+      <div style={{ position: 'absolute', width: 0, height: 0, overflow: 'hidden', visibility: 'hidden' }}>
+        <HandDetector
+          onNext={handleGestureNext}
+          onPrev={handleGesturePrev}
+          onPointerMove={handlePointerMove}
+          debug={true}
+          gestureSettings={{
+            swipeThreshold: 0.12,
+            swipeCooldown: 800,
+            pointerThrottle: 5,
+            smoothingAlpha: 0.85,
+            frameInterval: 50,
+            canvasScale: 1.0,
+            pointerMovementThreshold: 0.120,
+            requireIndexOnly: true,
+            enableThumbDirection: true,
+            thumbDirectionThreshold: 0.060,
+            thumbCooldown: 800,
+            invertHorizontal: true,
+            invertActions: false,
+          }}
+        />
+      </div>
 
       {/* ===== スライド実行画面 ===== */}
       <div className="flex flex-col items-center justify-center h-full w-full">
