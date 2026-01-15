@@ -14,6 +14,34 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
+// 初期化：public/presentations ディレクトリと config.json を作成
+const initializeStorage = async () => {
+  const presentationsDir = path.join(__dirname, 'public', 'presentations');
+  const configPath = path.join(presentationsDir, 'config.json');
+
+  try {
+    // ディレクトリを作成（既に存在する場合はスキップ）
+    await fs.mkdir(presentationsDir, { recursive: true });
+    
+    // config.json が存在しない場合は作成
+    try {
+      await fs.access(configPath);
+    } catch {
+      const initialConfig = {
+        title: 'プレゼンテーション',
+        slides: []
+      };
+      await fs.writeFile(configPath, JSON.stringify(initialConfig, null, 2), 'utf-8');
+      console.log('初期config.jsonを作成しました');
+    }
+  } catch (error) {
+    console.error('初期化エラー:', error);
+  }
+};
+
+// サーバー起動時に初期化
+initializeStorage();
+
 // アップロード先のディレクトリ設定
 const storage = multer.diskStorage({
   destination: async (req, file, cb) => {

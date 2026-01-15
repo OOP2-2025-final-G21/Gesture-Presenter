@@ -94,7 +94,15 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
     try {
       const response = await fetch('/presentations/config.json');
       if (!response.ok) {
-        throw new Error('config.jsonの読み込みに失敗しました');
+        // config.jsonが存在しない場合は空の状態で初期化
+        console.warn('config.jsonが見つかりません。空の状態で開始します。');
+        set({
+          slides: [],
+          presentationTitle: 'プレゼンテーション',
+          currentSlideIndex: 0,
+          isPlaying: false,
+        });
+        return;
       }
       
       const config = await response.json();
@@ -116,6 +124,13 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
       console.log('config.jsonからスライドを読み込みました:', loadedSlides);
     } catch (error) {
       console.error('config.jsonの読み込みエラー:', error);
+      // エラー時も空の状態で初期化
+      set({
+        slides: [],
+        presentationTitle: 'プレゼンテーション',
+        currentSlideIndex: 0,
+        isPlaying: false,
+      });
     }
   },
 }));
