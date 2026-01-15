@@ -1,0 +1,20 @@
+{
+  "title": "プレゼンテーション",
+  "slides": [
+    {
+      "id": "slide1",
+      "title": "スライド1",
+      "image": "slide1.jpg"
+    },
+    {
+      "id": "slide2",
+      "title": "スライド2",
+      "image": "slide2.jpg"
+    },
+    {
+      "id": "slide3",
+      "title": "スライド3",
+      "image": "slide3.jpg"
+    }
+  ]
+}

@@ -11,6 +11,7 @@ interface SlidesStore {
   slides: Slide[];
   currentSlideIndex: number;
   isPlaying: boolean;
+  presentationTitle: string;
   
   // スライド操作
   addSlide: (slide: Slide) => void;
@@ -26,12 +27,16 @@ interface SlidesStore {
   
   // ゲッター
   getCurrentSlide: () => Slide | undefined;
+  
+  // config.json読み込み
+  loadFromConfig: () => Promise<void>;
 }
 
 export const useSlidesStore = create<SlidesStore>((set, get) => ({
   slides: [],
   currentSlideIndex: 0,
   isPlaying: false,
+  presentationTitle: '',
 
   addSlide: (slide: Slide) => set((state) => ({
     slides: [...state.slides, slide],
@@ -83,5 +88,34 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
   getCurrentSlide: () => {
     const state = get();
     return state.slides[state.currentSlideIndex];
+  },
+
+  loadFromConfig: async () => {
+    try {
+      const response = await fetch('/presentations/config.json');
+      if (!response.ok) {
+        throw new Error('config.jsonの読み込みに失敗しました');
+      }
+      
+      const config = await response.json();
+      
+      const loadedSlides: Slide[] = config.slides.map((slide: any) => ({
+        id: slide.id,
+        name: slide.title,
+        imagePath: `/presentations/${slide.image}`,
+        uploadedAt: new Date(),
+      }));
+
+      set({
+        slides: loadedSlides,
+        presentationTitle: config.title || 'プレゼンテーション',
+        currentSlideIndex: 0,
+        isPlaying: false,
+      });
+
+      console.log('config.jsonからスライドを読み込みました:', loadedSlides);
+    } catch (error) {
+      console.error('config.jsonの読み込みエラー:', error);
+    }
   },
 }));

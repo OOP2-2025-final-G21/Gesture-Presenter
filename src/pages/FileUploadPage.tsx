@@ -1,16 +1,21 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useSlidesStore } from '../store/slidesStore';
 
 export const FileUploadPage = () => {
   const navigate = useNavigate();
-  const { slides, addSlide, startPresentation, removeSlide } = useSlidesStore();
+  const { slides, addSlide, startPresentation, removeSlide, loadFromConfig } = useSlidesStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
   const [selectedSlideId, setSelectedSlideId] = useState<string | null>(null);
   const dragCounter = useRef(0);
+
+  // 初回マウント時にconfig.jsonから読み込む
+  useEffect(() => {
+    loadFromConfig();
+  }, []); // loadFromConfigは安定しているので空配列で良い
 
   const handleFiles = async (files: FileList | null) => {
     if (!files) return;
@@ -20,7 +25,7 @@ export const FileUploadPage = () => {
     // ファイルを処理（複数ファイル対応）
     for (let i = 0; i < files.length; i++) {
       const file = files[i];
-      const fileId = `file-${Date.now()}-${i}`;
+      const tempId = `temp-${Date.now()}-${i}`;
       
       // ファイル型のバリデーション（画像ファイルとpptxのみ）
       const isImage = ['image/jpeg', 'image/png', 'image/jpg'].includes(file.type);
@@ -37,51 +42,61 @@ export const FileUploadPage = () => {
         continue;
       }
 
-      // ローディング状態を設定（プログレスを0に設定してスケルトンを表示）
-      setUploadProgress((prev) => ({ ...prev, [fileId]: 0 }));
+      // ローディング状態を設定
+      setUploadProgress((prev) => ({ ...prev, [tempId]: 0 }));
 
-      // スライドをローディング状態で追加
-      addSlide({
-        id: fileId,
-        name: file.name,
-        imagePath: '', // 一時的に空の画像パス
-        uploadedAt: new Date(),
-      });
+      try {
+        // FormDataを作成してAPIにアップロード
+        const formData = new FormData();
+        formData.append('file', file);
+        formData.append('title', file.name.replace(/\.[^/.]+$/, ''));
 
-      // 最初のファイルを自動的に選択
-      if (!selectedSlideId) {
-        setSelectedSlideId(fileId);
-      }
+        // プログレスを更新
+        setUploadProgress((prev) => ({ ...prev, [tempId]: 50 }));
 
-      // FileReaderを使用してプレビュー
-      const reader = new FileReader();
-      reader.onprogress = (event) => {
-        if (event.lengthComputable) {
-          const progress = Math.round((event.loaded / event.total) * 100);
-          setUploadProgress((prev) => ({ ...prev, [fileId]: progress }));
-        }
-      };
+        // APIにアップロード
+        const response = await fetch('http://localhost:3001/api/upload', {
+          method: 'POST',
+          body: formData,
+        });
 
-      reader.onload = (e) => {
-        const imagePath = e.target?.result as string;
-
-        // スライドの画像パスを更新
-        const slide = slides.find((s) => s.id === fileId);
-        if (slide) {
-          slide.imagePath = imagePath;
+        if (!response.ok) {
+          throw new Error('アップロードに失敗しました');
         }
 
-        // プログレスを100%にして、その後削除
-        setUploadProgress((prev) => ({ ...prev, [fileId]: 100 }));
+        const data = await response.json();
+
+        // プログレスを100%に
+        setUploadProgress((prev) => ({ ...prev, [tempId]: 100 }));
+
+        // スライドをストアに追加
+        addSlide(data.slide);
+
+        // 最初のファイルを自動的に選択
+        if (!selectedSlideId) {
+          setSelectedSlideId(data.slide.id);
+        }
+
+        // ローディング状態を削除
         setTimeout(() => {
           setUploadProgress((prev) => {
             const newProgress = { ...prev };
-            delete newProgress[fileId];
+            delete newProgress[tempId];
             return newProgress;
           });
         }, 500);
-      };
-      reader.readAsDataURL(file);
+
+      } catch (error) {
+        console.error('アップロードエラー:', error);
+        alert('ファイルのアップロードに失敗しました');
+        
+        // エラー時はローディング状態を削除
+        setUploadProgress((prev) => {
+          const newProgress = { ...prev };
+          delete newProgress[tempId];
+          return newProgress;
+        });
+      }
     }
 
     setIsUploading(false);
@@ -152,17 +167,17 @@ export const FileUploadPage = () => {
       {/* 左側：アップロード領域 */}
       <div className="upload-section">
         <div className="upload-header">
-          <div className="icon-powerpoint-container">
-            <img src="/pptx.png" alt="PowerPoint" className="icon-powerpoint" />
-          </div>
-          <div className="upload-title-container">
-            <h1>ファイルをアップロード</h1>
-            <p className="upload-description">.pptx .pngに対応しています</p>
-          </div>
-          <div className="icon-image-container">
-            <img src="/photo.png" alt="Image" className="icon-image" />
-          </div>
+        <div className="icon-powerpoint-container">
+          <img src="/pptx.png" alt="PowerPoint" className="icon-powerpoint" />
         </div>
+        <div className="upload-title-container">
+          <h1>ファイルをアップロード</h1>
+          <p className="upload-description">画像ファイルのみ対応しております。</p>
+        </div>
+        <div className="icon-image-container">
+          <img src="/photo.png" alt="Image" className="icon-image" />
+        </div>
+      </div>
 
         {/* ドラッグアンドドロップ領域 */}
         <div
@@ -231,10 +246,25 @@ export const FileUploadPage = () => {
                             </div>
                           </div>
                           <button
-                            onClick={(e) => {
-                              removeSlide(slide.id);
-                              if (selectedSlideId === slide.id) {
-                                setSelectedSlideId(null);
+                            onClick={async () => {
+                              try {
+                                // APIでスライドを削除
+                                const response = await fetch(`http://localhost:3001/api/slides/${slide.id}`, {
+                                  method: 'DELETE',
+                                });
+
+                                if (!response.ok) {
+                                  throw new Error('削除に失敗しました');
+                                }
+
+                                // ストアからも削除
+                                removeSlide(slide.id);
+                                if (selectedSlideId === slide.id) {
+                                  setSelectedSlideId(null);
+                                }
+                              } catch (error) {
+                                console.error('削除エラー:', error);
+                                alert('スライドの削除に失敗しました');
                               }
                             }}
                             className="file-delete-btn"
