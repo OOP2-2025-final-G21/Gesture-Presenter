@@ -5,7 +5,7 @@ import { useSlidesStore } from '../store/slidesStore';
 
 export const FileUploadPage = () => {
   const navigate = useNavigate();
-  const { slides, addSlide, updateSlide, startPresentation, removeSlide, setSlides, loadFromConfig } = useSlidesStore();
+  const { slides, addSlide, updateSlide, startPresentation, removeSlide, removeAllSlides, setSlides, loadFromConfig } = useSlidesStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = useState(false);
@@ -373,15 +373,51 @@ export const FileUploadPage = () => {
           )}
         </div>
 
-        {/* 再生ボタン */}
-        <button
-          onClick={handleStartPresentation}
-          disabled={slides.length === 0}
-          className="play-button"
-        >
-          <span>▶</span>
-          <span>スライドを再生</span>
-        </button>
+        {/* ボタンエリア */}
+        <div className="button-container">
+          {/* 全削除ボタン */}
+          <button
+            onClick={async () => {
+              if (slides.length === 0) return;
+              
+              if (!confirm('すべてのスライドを削除しますか？')) {
+                return;
+              }
+
+              try {
+                // 各スライドをAPIで削除
+                await Promise.all(
+                  slides.map(slide => 
+                    fetch(`http://localhost:3001/api/slides/${slide.id}`, {
+                      method: 'DELETE',
+                    })
+                  )
+                );
+
+                // ストアからも全削除
+                removeAllSlides();
+                setSelectedSlideId(null);
+              } catch (error) {
+                console.error('全削除エラー:', error);
+                alert('スライドの削除に失敗しました');
+              }
+            }}
+            disabled={slides.length === 0}
+            className="delete-all-button"
+          >
+            <img src="/trash.svg" alt="削除" className="trash-icon" />
+          </button>
+
+          {/* 再生ボタン */}
+          <button
+            onClick={handleStartPresentation}
+            disabled={slides.length === 0}
+            className="play-button"
+          >
+            <span>▶</span>
+            <span>スライドを再生</span>
+          </button>
+        </div>
       </div>
     </div>
   );
