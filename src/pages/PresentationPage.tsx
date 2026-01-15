@@ -242,34 +242,38 @@ export const PresentationPage = () => {
           "
         />
 
-        {/* ボタン操作（保険） */}
-        <div className="absolute bottom-8 flex gap-4">
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              previousSlide();
-            }}
-            disabled={currentSlideIndex === 0}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50 hover:bg-gray-400 transition"
-          >
-            ←
-          </button>
+        {/* スライド操作コントロール（クリックで表示） */}
+        {showHeader && (
+          <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex gap-2 items-center z-10">
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                previousSlide();
+              }}
+              disabled={currentSlideIndex === 0}
+              className="bg-[#232323] flex items-center justify-center px-[10px] py-2 rounded-xl disabled:opacity-30 hover:opacity-80 transition"
+            >
+              <span className="text-white text-[14px]">←</span>
+            </button>
 
-          <button
-            onClick={(e) => {
-              e.stopPropagation();
-              nextSlide();
-            }}
-            disabled={currentSlideIndex === slides.length - 1}
-            className="px-4 py-2 bg-gray-300 rounded disabled:opacity-50 hover:bg-gray-400 transition"
-          >
-            →
-          </button>
-        </div>
+            <div className="bg-[#232323] flex items-center justify-center px-[30px] py-2 rounded-xl min-w-[91px]">
+              <p className="text-white text-[14px]">
+                {currentSlideIndex + 1}/{slides.length}
+              </p>
+            </div>
 
-        <p className="absolute bottom-2 text-sm text-gray-600">
-          {currentSlideIndex + 1} / {slides.length}
-        </p>
+            <button
+              onClick={(e) => {
+                e.stopPropagation();
+                nextSlide();
+              }}
+              disabled={currentSlideIndex === slides.length - 1}
+              className="bg-[#232323] flex items-center justify-center px-[10px] py-2 rounded-xl disabled:opacity-30 hover:opacity-80 transition"
+            >
+              <span className="text-white text-[14px]">→</span>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   );
