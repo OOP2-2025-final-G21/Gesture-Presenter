@@ -1,16 +1,23 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { motion, Reorder, AnimatePresence } from 'framer-motion';
 import { useSlidesStore } from '../store/slidesStore';
 
 export const FileUploadPage = () => {
   const navigate = useNavigate();
-  const { slides, addSlide, startPresentation, removeSlide, loadFromConfig } = useSlidesStore();
+  const { slides, addSlide, startPresentation, removeSlide, setSlides, loadFromConfig } = useSlidesStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = useState(false);
   const [isDragActive, setIsDragActive] = useState(false);
   const [selectedSlideId, setSelectedSlideId] = useState<string | null>(null);
+  const [orderedSlides, setOrderedSlides] = useState(slides);
   const dragCounter = useRef(0);
+
+  // slidesが変更されたらorderedSlidesも更新
+  useEffect(() => {
+    setOrderedSlides(slides);
+  }, [slides]);
 
   // 初回マウント時にconfig.jsonから読み込む
   useEffect(() => {
@@ -162,6 +169,39 @@ export const FileUploadPage = () => {
     fileInputRef.current?.click();
   };
 
+  // Reorderでスライドの順番を変更
+  const handleReorder = async (newOrder: typeof slides) => {
+    setOrderedSlides(newOrder);
+    setSlides(newOrder);
+
+    // config.jsonも更新
+    try {
+      const slideIds = newOrder.map(slide => slide.id);
+      console.log('並び替えリクエスト:', slideIds);
+      
+      const response = await fetch('http://localhost:3001/api/slides/reorder', {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ slideIds }),
+      });
+
+      const result = await response.json();
+      console.log('サーバーレスポンス:', result);
+
+      if (!response.ok) {
+        throw new Error(result.error || '並び替えの保存に失敗しました');
+      }
+
+      console.log('並び替えを保存しました');
+    } catch (error) {
+      console.error('並び替えエラー詳細:', error);
+      // エラーが発生してもUI上は変更を保持
+      // alert('スライドの順番の保存に失敗しました: ' + (error instanceof Error ? error.message : String(error)));
+    }
+  };
+
   return (
     <div className="file-upload-container">
       {/* 左側：アップロード領域 */}
@@ -216,16 +256,47 @@ export const FileUploadPage = () => {
       <div className="file-list-section">
         {/* ファイルリスト */}
         <div className="file-list-container">
-          <div className="file-list">
-            {slides.length === 0 ? (
-              <div className="file-list-empty">
-                <p>まだファイルがアップロードされていません</p>
-              </div>
-            ) : (
-              slides.map((slide, index) => {
+          {orderedSlides.length === 0 ? (
+            <div className="file-list-empty">
+              <p>まだファイルがアップロードされていません</p>
+            </div>
+          ) : (
+            <Reorder.Group 
+              axis="y" 
+              values={orderedSlides} 
+              onReorder={handleReorder}
+              className="file-list"
+            >
+              {orderedSlides.map((slide) => {
                 const isLoading = uploadProgress[slide.id] !== undefined;
                 return (
-                  <div key={slide.id}>
+                  <Reorder.Item
+                    key={slide.id}
+                    value={slide}
+                    drag={!isLoading}
+                    dragListener={!isLoading}
+                    initial={{ opacity: 0, y: 20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, scale: 0.8 }}
+                    whileDrag={{
+                      scale: 1.02,
+                      zIndex: 10,
+                      boxShadow: '0 4px 20px rgba(0, 0, 0, 0.1)'
+                    }}
+                    transition={{
+                      layout: {
+                        type: 'spring',
+                        stiffness: 300,
+                        damping: 30
+                      }
+                    }}
+                    style={{
+                      cursor: isLoading ? 'default' : 'grab',
+                      position: 'relative',
+                      marginBottom: '6px',
+                      listStyle: 'none'
+                    }}
+                  >
                     {isLoading ? (
                       // スケルトンローディングUI
                       <div className="file-skeleton">
@@ -239,46 +310,46 @@ export const FileUploadPage = () => {
                       // 通常のファイルカード
                       <div className="file-item">
                         <div className="file-item-content">
-                          <div className="file-type-badge">.pptx</div>
-                          <div className="file-info">
-                            <div className="file-details">
-                              <p className="file-name">{slide.name.replace(/\.[^/.]+$/, '')}</p>
-                            </div>
+                        <div className="file-type-badge">.pptx</div>
+                        <div className="file-info">
+                          <div className="file-details">
+                            <p className="file-name">{slide.name.replace(/\.[^/.]+$/, '')}</p>
                           </div>
-                          <button
-                            onClick={async () => {
-                              try {
-                                // APIでスライドを削除
-                                const response = await fetch(`http://localhost:3001/api/slides/${slide.id}`, {
-                                  method: 'DELETE',
-                                });
+                        </div>
+                        <button
+                          onClick={async () => {
+                            try {
+                              // APIでスライドを削除
+                              const response = await fetch(`http://localhost:3001/api/slides/${slide.id}`, {
+                                method: 'DELETE',
+                              });
 
-                                if (!response.ok) {
-                                  throw new Error('削除に失敗しました');
-                                }
-
-                                // ストアからも削除
-                                removeSlide(slide.id);
-                                if (selectedSlideId === slide.id) {
-                                  setSelectedSlideId(null);
-                                }
-                              } catch (error) {
-                                console.error('削除エラー:', error);
-                                alert('スライドの削除に失敗しました');
+                              if (!response.ok) {
+                                throw new Error('削除に失敗しました');
                               }
-                            }}
-                            className="file-delete-btn"
-                          >
-                            ×
-                          </button>
+
+                              // ストアからも削除
+                              removeSlide(slide.id);
+                              if (selectedSlideId === slide.id) {
+                                setSelectedSlideId(null);
+                              }
+                            } catch (error) {
+                              console.error('削除エラー:', error);
+                              alert('スライドの削除に失敗しました');
+                            }
+                          }}
+                          className="file-delete-btn"
+                        >
+                          ×
+                        </button>
                         </div>
                       </div>
                     )}
-                  </div>
+                  </Reorder.Item>
                 );
-              })
-            )}
-          </div>
+              })}
+            </Reorder.Group>
+          )}
         </div>
 
         {/* 再生ボタン */}

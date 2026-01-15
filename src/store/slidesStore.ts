@@ -17,6 +17,8 @@ interface SlidesStore {
   addSlide: (slide: Slide) => void;
   removeSlide: (id: string) => void;
   removeAllSlides: () => void;
+  reorderSlides: (startIndex: number, endIndex: number) => void;
+  setSlides: (slides: Slide[]) => void;
   
   // 再生制御
   startPresentation: (startIndex?: number) => void;
@@ -51,6 +53,15 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
     currentSlideIndex: 0,
     isPlaying: false,
   }),
+
+  reorderSlides: (startIndex: number, endIndex: number) => set((state) => {
+    const newSlides = [...state.slides];
+    const [removed] = newSlides.splice(startIndex, 1);
+    newSlides.splice(endIndex, 0, removed);
+    return { slides: newSlides };
+  }),
+
+  setSlides: (slides: Slide[]) => set({ slides }),
 
   startPresentation: (startIndex = 0) => set({
     isPlaying: true,

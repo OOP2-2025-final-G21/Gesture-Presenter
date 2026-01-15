@@ -160,6 +160,44 @@ app.delete('/api/slides/:id', async (req, res) => {
   }
 });
 
+// スライドの順番を更新するエンドポイント
+app.put('/api/slides/reorder', async (req, res) => {
+  try {
+    console.log('並び替えリクエストを受信:', req.body);
+    const { slideIds } = req.body;
+    
+    if (!Array.isArray(slideIds)) {
+      console.error('slideIdsが配列ではありません:', slideIds);
+      return res.status(400).json({ error: '不正なリクエストです' });
+    }
+
+    const configPath = path.join(__dirname, 'public', 'presentations', 'config.json');
+    console.log('config.jsonのパス:', configPath);
+    
+    // config.jsonを読み込み
+    const configData = await fs.readFile(configPath, 'utf-8');
+    const config = JSON.parse(configData);
+    console.log('現在のスライド:', config.slides.map((s: any) => s.id));
+
+    // 新しい順番でスライドを並び替え
+    const reorderedSlides = slideIds
+      .map(id => config.slides.find((s: any) => s.id === id))
+      .filter(Boolean); // 存在するスライドのみ
+
+    console.log('並び替え後のスライド数:', reorderedSlides.length);
+    config.slides = reorderedSlides;
+
+    // config.jsonを更新
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    console.log('config.jsonを更新しました');
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('並び替えエラー詳細:', error);
+    res.status(500).json({ error: '並び替えに失敗しました: ' + (error instanceof Error ? error.message : String(error)) });
+  }
+});
+
 app.listen(PORT, () => {
   console.log(`APIサーバーが起動しました: http://localhost:${PORT}`);
 });
