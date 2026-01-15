@@ -34,11 +34,29 @@ export const PresentationPage = () => {
 
   // ===== ジェスチャーハンドラー =====
   const handleGestureNext = () => {
+    // ポインターが活性化している場合はスライド操作を無効化（誤操作防止）
+    const POINTER_TIMEOUT = 200;
+    const isPointerActive = pointer && (performance.now() - pointerLastUpdateRef.current < POINTER_TIMEOUT);
+    
+    if (isPointerActive) {
+      console.log('Gesture: Next blocked (pointer active)');
+      return;
+    }
+    
     console.log('Gesture: Next slide');
     nextSlide();
   };
 
   const handleGesturePrev = () => {
+    // ポインターが活性化している場合はスライド操作を無効化（誤操作防止）
+    const POINTER_TIMEOUT = 200;
+    const isPointerActive = pointer && (performance.now() - pointerLastUpdateRef.current < POINTER_TIMEOUT);
+    
+    if (isPointerActive) {
+      console.log('Gesture: Prev blocked (pointer active)');
+      return;
+    }
+    
     console.log('Gesture: Previous slide');
     previousSlide();
   };
