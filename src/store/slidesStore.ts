@@ -15,6 +15,7 @@ interface SlidesStore {
   
   // スライド操作
   addSlide: (slide: Slide) => void;
+  updateSlide: (id: string, updates: Partial<Slide>) => void;
   removeSlide: (id: string) => void;
   removeAllSlides: () => void;
   reorderSlides: (startIndex: number, endIndex: number) => void;
@@ -42,6 +43,12 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
 
   addSlide: (slide: Slide) => set((state) => ({
     slides: [...state.slides, slide],
+  })),
+
+  updateSlide: (id: string, updates: Partial<Slide>) => set((state) => ({
+    slides: state.slides.map((slide) =>
+      slide.id === id ? { ...slide, ...updates } : slide
+    ),
   })),
 
   removeSlide: (id: string) => set((state) => ({

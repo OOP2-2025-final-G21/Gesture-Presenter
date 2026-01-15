@@ -225,7 +225,18 @@ export const FileUploadScreen = () => {
                       // 通常のファイルカード
                       <div className="file-item">
                         <div className="file-item-content">
-                          <div className="file-type-badge">.pptx</div>
+                          <div className="file-type-badge">
+                            <img 
+                              src={slide.imagePath} 
+                              alt={slide.name}
+                              style={{
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                                borderRadius: '8px'
+                              }}
+                            />
+                          </div>
                           <div className="file-info">
                             <div className="file-details">
                               <p className="file-name">{slide.name.replace(/\.[^/.]+$/, '')}</p>

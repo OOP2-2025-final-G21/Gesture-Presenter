@@ -5,7 +5,7 @@ import { useSlidesStore } from '../store/slidesStore';
 
 export const FileUploadPage = () => {
   const navigate = useNavigate();
-  const { slides, addSlide, startPresentation, removeSlide, setSlides, loadFromConfig } = useSlidesStore();
+  const { slides, addSlide, updateSlide, startPresentation, removeSlide, setSlides, loadFromConfig } = useSlidesStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = useState(false);
@@ -49,6 +49,14 @@ export const FileUploadPage = () => {
         continue;
       }
 
+      // ローディング状態のスライドを追加
+      addSlide({
+        id: tempId,
+        name: file.name,
+        imagePath: '',
+        uploadedAt: new Date(),
+      });
+
       // ローディング状態を設定
       setUploadProgress((prev) => ({ ...prev, [tempId]: 0 }));
 
@@ -76,7 +84,8 @@ export const FileUploadPage = () => {
         // プログレスを100%に
         setUploadProgress((prev) => ({ ...prev, [tempId]: 100 }));
 
-        // スライドをストアに追加
+        // 古いスライド（tempId）を削除して、新しいスライドを追加
+        removeSlide(tempId);
         addSlide(data.slide);
 
         // 最初のファイルを自動的に選択
@@ -97,7 +106,8 @@ export const FileUploadPage = () => {
         console.error('アップロードエラー:', error);
         alert('ファイルのアップロードに失敗しました');
         
-        // エラー時はローディング状態を削除
+        // エラー時はスライドを削除
+        removeSlide(tempId);
         setUploadProgress((prev) => {
           const newProgress = { ...prev };
           delete newProgress[tempId];
@@ -310,7 +320,18 @@ export const FileUploadPage = () => {
                       // 通常のファイルカード
                       <div className="file-item">
                         <div className="file-item-content">
-                        <div className="file-type-badge">.pptx</div>
+                        <div className="file-type-badge">
+                          <img 
+                            src={slide.imagePath} 
+                            alt={slide.name}
+                            style={{
+                              width: '100%',
+                              height: '100%',
+                              objectFit: 'cover',
+                              borderRadius: '8px'
+                            }}
+                          />
+                        </div>
                         <div className="file-info">
                           <div className="file-details">
                             <p className="file-name">{slide.name.replace(/\.[^/.]+$/, '')}</p>
