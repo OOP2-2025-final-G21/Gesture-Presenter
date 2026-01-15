@@ -14,6 +14,9 @@ const PORT = 3001;
 app.use(cors());
 app.use(express.json());
 
+// 静的ファイルの提供（画像アクセス用）
+app.use('/presentations', express.static(path.join(__dirname, 'public', 'presentations')));
+
 // 初期化：public/presentations ディレクトリと config.json を作成
 const initializeStorage = async () => {
   const presentationsDir = path.join(__dirname, 'public', 'presentations');
@@ -113,7 +116,7 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
       slide: {
         id: slideId,
         name: newSlide.title,
-        imagePath: `/presentations/${req.file.filename}`,
+        imagePath: `http://localhost:${PORT}/presentations/${req.file.filename}`,
         uploadedAt: new Date()
       }
     });

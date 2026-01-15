@@ -128,7 +128,7 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
       const loadedSlides: Slide[] = config.slides.map((slide: any) => ({
         id: slide.id,
         name: slide.title,
-        imagePath: `/presentations/${slide.image}`,
+        imagePath: `http://localhost:3001/presentations/${slide.image}`,
         uploadedAt: new Date(),
       }));
 
