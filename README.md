@@ -37,7 +37,7 @@ npm install
 2. 開発サーバの起動
 
 ```bash
-npm run dev
+npm run dev:all
 ```
 
 ブラウザで表示されるローカル URL（例: http://localhost:5173）にアクセスし、カメラの使用を許可してください。
