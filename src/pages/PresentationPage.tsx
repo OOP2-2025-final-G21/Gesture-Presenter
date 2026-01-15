@@ -14,7 +14,7 @@ export const PresentationPage = () => {
     previousSlide,
   } = useSlidesStore();
 
-  const [showHeader, setShowHeader] = useState(false);
+  const [showHeader, setShowHeader] = useState(true);
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const pointerLastUpdateRef = useRef<number>(0);
@@ -244,7 +244,7 @@ export const PresentationPage = () => {
 
         {/* スライド操作コントロール（クリックで表示） */}
         {showHeader && (
-          <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex gap-1 items-center z-10">
+          <div className="fixed bottom-8 left-1/2 transform -translate-x-1/2 flex gap-[2px] items-center z-10">
             <button
               onClick={(e) => {
                 e.stopPropagation();

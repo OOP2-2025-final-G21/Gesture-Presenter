@@ -72,7 +72,7 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
 
   startPresentation: (startIndex = 0) => set({
     isPlaying: true,
-    currentSlideIndex: startIndex,
+    currentSlideIndex: 0,  // 常に最初のスライド（0番目）から開始
   }),
 
   endPresentation: () => set({
