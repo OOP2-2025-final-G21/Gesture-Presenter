@@ -130,36 +130,52 @@ app.post('/api/upload', upload.single('file'), async (req, res) => {
 app.delete('/api/slides/:id', async (req, res) => {
   try {
     const slideId = req.params.id;
+    console.log(`削除リクエスト受信: slideId=${slideId}`);
+    
     const configPath = path.join(__dirname, 'public', 'presentations', 'config.json');
+    console.log(`config.jsonのパス: ${configPath}`);
     
     // config.jsonを読み込み
     const configData = await fs.readFile(configPath, 'utf-8');
     const config = JSON.parse(configData);
+    console.log(`現在のスライド数: ${config.slides.length}`);
 
     // スライドを検索
     const slideIndex = config.slides.findIndex((s: any) => s.id === slideId);
+    console.log(`スライドのインデックス: ${slideIndex}`);
+    
     if (slideIndex === -1) {
+      console.error(`スライドが見つかりません: ${slideId}`);
+      console.log('利用可能なスライドID:', config.slides.map((s: any) => s.id));
       return res.status(404).json({ error: 'スライドが見つかりません' });
     }
 
     const slide = config.slides[slideIndex];
+    console.log(`削除するスライド: ${slide.title}, 画像: ${slide.image}`);
     
     // 画像ファイルを削除
     try {
       const imagePath = path.join(__dirname, 'public', 'presentations', slide.image);
+      console.log(`画像ファイルのパス: ${imagePath}`);
       await fs.unlink(imagePath);
+      console.log('画像ファイルを削除しました');
     } catch (error) {
       console.error('画像削除エラー:', error);
+      // 画像がなくても続行
     }
 
     // config.jsonから削除
     config.slides.splice(slideIndex, 1);
     await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    console.log('config.jsonを更新しました。残りのスライド数:', config.slides.length);
 
     res.json({ success: true });
   } catch (error) {
-    console.error('削除エラー:', error);
-    res.status(500).json({ error: '削除に失敗しました' });
+    console.error('削除エラー詳細:', error);
+    res.status(500).json({ 
+      error: '削除に失敗しました',
+      details: error instanceof Error ? error.message : String(error)
+    });
   }
 });
 
@@ -198,6 +214,39 @@ app.put('/api/slides/reorder', async (req, res) => {
   } catch (error) {
     console.error('並び替えエラー詳細:', error);
     res.status(500).json({ error: '並び替えに失敗しました: ' + (error instanceof Error ? error.message : String(error)) });
+  }
+});
+
+// スライドを全削除するエンドポイント
+app.delete('/api/slides', async (req, res) => {
+  try {
+    const configPath = path.join(__dirname, 'public', 'presentations', 'config.json');
+    const presentationsDir = path.join(__dirname, 'public', 'presentations');
+    
+    // config.jsonを読み込み
+    const configData = await fs.readFile(configPath, 'utf-8');
+    const config = JSON.parse(configData);
+
+    // すべての画像ファイルを削除
+    for (const slide of config.slides) {
+      try {
+        const imagePath = path.join(presentationsDir, slide.image);
+        await fs.unlink(imagePath);
+        console.log(`画像を削除しました: ${slide.image}`);
+      } catch (error) {
+        console.error(`画像削除エラー: ${slide.image}`, error);
+      }
+    }
+
+    // config.jsonを初期化
+    config.slides = [];
+    await fs.writeFile(configPath, JSON.stringify(config, null, 2), 'utf-8');
+    console.log('すべてのスライドを削除しました');
+
+    res.json({ success: true });
+  } catch (error) {
+    console.error('全削除エラー詳細:', error);
+    res.status(500).json({ error: '全削除に失敗しました: ' + (error instanceof Error ? error.message : String(error)) });
   }
 });
 

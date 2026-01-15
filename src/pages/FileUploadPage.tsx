@@ -341,12 +341,13 @@ export const FileUploadPage = () => {
                           onClick={async () => {
                             try {
                               // APIでスライドを削除
-                              const response = await fetch(`http://localhost:3001/api/slides/${slide.id}`, {
+                              const response = await fetch(`/api/slides/${slide.id}`, {
                                 method: 'DELETE',
                               });
 
                               if (!response.ok) {
-                                throw new Error('削除に失敗しました');
+                                const errorData = await response.json().catch(() => ({}));
+                                throw new Error(errorData.error || '削除に失敗しました');
                               }
 
                               // ストアからも削除
@@ -356,7 +357,7 @@ export const FileUploadPage = () => {
                               }
                             } catch (error) {
                               console.error('削除エラー:', error);
-                              alert('スライドの削除に失敗しました');
+                              alert(`スライドの削除に失敗しました: ${error instanceof Error ? error.message : String(error)}`);
                             }
                           }}
                           className="file-delete-btn"
@@ -385,21 +386,27 @@ export const FileUploadPage = () => {
               }
 
               try {
-                // 各スライドをAPIで削除
-                await Promise.all(
-                  slides.map(slide => 
-                    fetch(`http://localhost:3001/api/slides/${slide.id}`, {
-                      method: 'DELETE',
-                    })
-                  )
-                );
+                // 全削除APIを呼び出す
+                console.log('全削除リクエストを送信します...');
+                const response = await fetch('/api/slides', {
+                  method: 'DELETE',
+                });
+
+                console.log('レスポンスステータス:', response.status);
+                const result = await response.json();
+                console.log('レスポンス内容:', result);
+
+                if (!response.ok) {
+                  throw new Error(result.error || result.details || '全削除に失敗しました');
+                }
 
                 // ストアからも全削除
                 removeAllSlides();
                 setSelectedSlideId(null);
+                console.log('全削除が完了しました');
               } catch (error) {
-                console.error('全削除エラー:', error);
-                alert('スライドの削除に失敗しました');
+                console.error('全削除エラー詳細:', error);
+                alert(`スライドの削除に失敗しました: ${error instanceof Error ? error.message : String(error)}`);
               }
             }}
             disabled={slides.length === 0}
