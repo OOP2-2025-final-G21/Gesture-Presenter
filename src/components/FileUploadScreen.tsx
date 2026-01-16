@@ -207,7 +207,7 @@ export const FileUploadScreen = () => {
                 <p>まだファイルがアップロードされていません</p>
               </div>
             ) : (
-              slides.map((slide, index) => {
+              slides.map((slide) => {
                 const isLoading = uploadProgress[slide.id] !== undefined;
 
                 return (
@@ -243,7 +243,7 @@ export const FileUploadScreen = () => {
                             </div>
                           </div>
                           <button
-                            onClick={(e) => {
+                            onClick={() => {
                               removeSlide(slide.id);
                               if (selectedSlideId === slide.id) {
                                 setSelectedSlideId(null);

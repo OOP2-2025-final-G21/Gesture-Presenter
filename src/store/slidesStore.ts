@@ -70,7 +70,7 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
 
   setSlides: (slides: Slide[]) => set({ slides }),
 
-  startPresentation: (startIndex = 0) => set({
+  startPresentation: () => set({
     isPlaying: true,
     currentSlideIndex: 0,  // 常に最初のスライド（0番目）から開始
   }),
@@ -125,19 +125,22 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
       
       const config = await response.json();
       
-      const loadedSlides: Slide[] = config.slides.map((slide: any) => ({
+      interface ConfigSlide {
+        id: string;
+        title: string;
+        image: string;
+      }
+      
+      const loadedSlides: Slide[] = config.slides.map((slide: ConfigSlide) => ({
         id: slide.id,
         name: slide.title,
-        imagePath: `/presentations/${slide.image}`,  // 相対パスに修正
+        imagePath: `/presentations/${slide.image}`,
         uploadedAt: new Date(),
       }));
 
-      // 既存のisPlayingとcurrentSlideIndexを保持
-      const currentState = get();
       set({
         slides: loadedSlides,
         presentationTitle: config.title || 'プレゼンテーション',
-        // isPlayingとcurrentSlideIndexは保持（プレゼンテーション中に呼ばれても影響なし）
       });
 
       console.log('config.jsonからスライドを読み込みました:', loadedSlides);

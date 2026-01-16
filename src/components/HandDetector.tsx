@@ -1,19 +1,30 @@
 import React, { useEffect, useRef } from 'react';
 import useGestureDetector from '../hooks/useGestureDetector';
-
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
-import { Hands } from '@mediapipe/hands';
-// eslint-disable-next-line @typescript-eslint/ban-ts-comment
-// @ts-ignore
+import { Hands, Results } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
+
+interface GestureSettings {
+	swipeThreshold?: number;
+	swipeCooldown?: number;
+	pointerThrottle?: number;
+	smoothingAlpha?: number;
+	frameInterval?: number;
+	canvasScale?: number;
+	pointerMovementThreshold?: number;
+	requireIndexOnly?: boolean;
+	enableThumbDirection?: boolean;
+	thumbDirectionThreshold?: number;
+	thumbCooldown?: number;
+	invertHorizontal?: boolean;
+	invertActions?: boolean;
+}
 
 interface Props {
 	onNext?: () => void;
 	onPrev?: () => void;
 	onPointerMove?: (p: { x: number; y: number }) => void;
 	debug?: boolean;
-	gestureSettings?: any;
+	gestureSettings?: GestureSettings;
 }
 
 const HandDetector: React.FC<Props> = ({ onNext, onPrev, onPointerMove, debug = false, gestureSettings }) => {
@@ -37,7 +48,7 @@ const HandDetector: React.FC<Props> = ({ onNext, onPrev, onPointerMove, debug = 
 	};
 
 	const mergedGestureOpts = { ...defaultGestureOpts, ...(gestureSettings || {}) };
-	mergedGestureOpts.debugCallback = (info: any) => debug && console.log('gesture debug', info);
+	(mergedGestureOpts as unknown as { debugCallback: (info: unknown) => void }).debugCallback = (info: unknown) => debug && console.log('gesture debug', info);
 
 	const latestPointerRef = useRef<{ x: number; y: number } | null>(null);
 	const pointerLastUpdateRef = useRef<number>(0);
@@ -56,7 +67,6 @@ const HandDetector: React.FC<Props> = ({ onNext, onPrev, onPointerMove, debug = 
 		const canvasCtx = canvasEl.getContext('2d');
 		if (!canvasCtx) return;
 
-		// @ts-ignore
 		const hands = new Hands({ locateFile: (file: string) => `https://cdn.jsdelivr.net/npm/@mediapipe/hands/${file}` });
 
 		hands.setOptions({
@@ -66,7 +76,7 @@ const HandDetector: React.FC<Props> = ({ onNext, onPrev, onPointerMove, debug = 
 			minTrackingConfidence: 0.5,
 		});
 
-		hands.onResults((results: any) => {
+		hands.onResults((results: Results) => {
 			canvasEl.width = videoEl.videoWidth;
 			canvasEl.height = videoEl.videoHeight;
 			canvasCtx.clearRect(0, 0, canvasEl.width, canvasEl.height);
@@ -112,11 +122,9 @@ const HandDetector: React.FC<Props> = ({ onNext, onPrev, onPointerMove, debug = 
 			}
 		});
 
-		// @ts-ignore
 		const camera = new Camera(videoEl, {
 			onFrame: async () => {
 				try {
-					// @ts-ignore
 					await hands.send({ image: videoEl });
 				} catch (e) {
 					if (debug) console.warn('hands send error', e);
@@ -126,17 +134,23 @@ const HandDetector: React.FC<Props> = ({ onNext, onPrev, onPointerMove, debug = 
 			height: 480,
 		});
 
-		camera.start().catch((e: any) => {
+		camera.start().catch((e: unknown) => {
 			if (debug) console.error('camera start failed', e);
 		});
 
 		return () => {
-			try { camera.stop(); } catch (e) {}
-			try { // @ts-ignore
+			try { 
+				camera.stop(); 
+			} catch {
+				// Ignore cleanup errors
+			}
+			try { 
 				hands.close();
-			} catch (e) {}
+			} catch {
+				// Ignore cleanup errors
+			}
 		};
-	}, [processResults, debug]);
+	}, [processResults, debug, mergedGestureOpts.invertHorizontal]);
 
 	return (
 		<div style={{ position: 'relative', width: '100%', maxWidth: 800 }}>

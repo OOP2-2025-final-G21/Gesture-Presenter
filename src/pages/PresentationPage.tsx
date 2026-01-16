@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { useSlidesStore } from '../store/slidesStore';
 import HandDetector from '../components/HandDetector';
 
@@ -24,7 +24,7 @@ export const PresentationPage = () => {
   // プレゼンテーション画面を開いた時にconfig.jsonを読み込む
   useEffect(() => {
     loadFromConfig();
-  }, []);
+  }, [loadFromConfig]);
 
   // スライドがない、または再生中でない場合はホームにリダイレクト
   useEffect(() => {
@@ -34,10 +34,10 @@ export const PresentationPage = () => {
   }, [isPlaying, slides.length, navigate]);
 
   // スライド終了
-  const handleEndSlide = () => {
+  const handleEndSlide = useCallback(() => {
     endPresentation();
     navigate('/');
-  };
+  }, [endPresentation, navigate]);
 
   // ===== ジェスチャーハンドラー =====
   const handleGestureNext = () => {
@@ -146,7 +146,7 @@ export const PresentationPage = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPlaying]);
+  }, [isPlaying, nextSlide, previousSlide, handleEndSlide]);
 
   // 画面クリックでヘッダー表示／非表示切り替え
   const handleScreenClick = () => {
@@ -163,7 +163,7 @@ export const PresentationPage = () => {
 
   return (
     <div
-      className="relative h-screen w-screen bg-white"
+      className="relative h-screen w-screen bg-black"
       onClick={handleScreenClick}
     >
       {/* ===== ヘッダー ===== */}

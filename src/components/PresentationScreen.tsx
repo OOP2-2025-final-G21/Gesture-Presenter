@@ -1,7 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useSlidesStore } from '../store/slidesStore';
-import { HandDetector } from './HandDetector';
+import HandDetector from './HandDetector';
 
 export const PresentationScreen = () => {
   const navigate = useNavigate();
@@ -22,7 +22,7 @@ export const PresentationScreen = () => {
   // プレゼンテーション画面を開いた時にconfig.jsonを読み込む
   useEffect(() => {
     loadFromConfig();
-  }, []);
+  }, [loadFromConfig]);
 
   // デバッグ用：presentationTitleの値を確認
   useEffect(() => {
@@ -37,10 +37,10 @@ export const PresentationScreen = () => {
   }, [isPlaying, slides.length, navigate]);
 
   // スライド終了
-  const handleEndSlide = () => {
+  const handleEndSlide = useCallback(() => {
     endPresentation();
     navigate('/');
-  };
+  }, [endPresentation, navigate]);
 
   // ===== キーボード操作 =====
   useEffect(() => {
@@ -65,7 +65,7 @@ export const PresentationScreen = () => {
 
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [isPlaying]);
+  }, [isPlaying, nextSlide, previousSlide, handleEndSlide]);
 
   // 画面クリックでヘッダー表示／非表示切り替え
   const handleScreenClick = () => {
@@ -149,7 +149,7 @@ export const PresentationScreen = () => {
             <HandDetector
               onNext={nextSlide}
               onPrev={previousSlide}
-              gestureOptions={{
+              gestureSettings={{
                 enableThumbDirection: true,
                 thumbDirectionThreshold: 0.08,
                 thumbCooldown: 600,

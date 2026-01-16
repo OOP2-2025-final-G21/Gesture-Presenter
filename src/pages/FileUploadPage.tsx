@@ -1,11 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { motion, Reorder, AnimatePresence } from 'framer-motion';
+import { Reorder } from 'framer-motion';
 import { useSlidesStore } from '../store/slidesStore';
 
 export const FileUploadPage = () => {
   const navigate = useNavigate();
-  const { slides, addSlide, updateSlide, startPresentation, removeSlide, removeAllSlides, setSlides, loadFromConfig } = useSlidesStore();
+  const { slides, addSlide, startPresentation, removeSlide, removeAllSlides, setSlides, loadFromConfig } = useSlidesStore();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
   const [isUploading, setIsUploading] = useState(false);
@@ -22,7 +22,7 @@ export const FileUploadPage = () => {
   // 初回マウント時にconfig.jsonから読み込む
   useEffect(() => {
     loadFromConfig();
-  }, []); // loadFromConfigは安定しているので空配列で良い
+  }, [loadFromConfig]);
 
   const handleFiles = async (files: FileList | null) => {
     if (!files) return;
