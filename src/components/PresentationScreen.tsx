@@ -12,10 +12,22 @@ export const PresentationScreen = () => {
     endPresentation,
     nextSlide,
     previousSlide,
+    presentationTitle,
+    loadFromConfig,
   } = useSlidesStore();
 
   const [showHeader, setShowHeader] = useState(true);  // 初期状態でヘッダーを表示
   const [showGestureOverlay, setShowGestureOverlay] = useState(false);
+
+  // プレゼンテーション画面を開いた時にconfig.jsonを読み込む
+  useEffect(() => {
+    loadFromConfig();
+  }, []);
+
+  // デバッグ用：presentationTitleの値を確認
+  useEffect(() => {
+    console.log('現在のpresentationTitle:', presentationTitle);
+  }, [presentationTitle]);
 
   // スライドがない、または再生中でない場合はホームにリダイレクト
   useEffect(() => {
@@ -78,7 +90,6 @@ export const PresentationScreen = () => {
   }
 
   const currentSlide = slides[currentSlideIndex];
-  const slideTitle = currentSlide?.name.replace(/\.[^/.]+$/, '') || "プレゼンテーション";
 
   return (
     <div
@@ -110,7 +121,11 @@ export const PresentationScreen = () => {
           {/* 中央：タイトル */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <p className="text-white text-[16px] font-medium whitespace-nowrap">
-              {slideTitle}
+              {presentationTitle || "プレゼンテーション"}
+            </p>
+            {/* デバッグ用 */}
+            <p className="text-xs text-gray-400 ml-2">
+              (デバッグ: "{presentationTitle}")
             </p>
           </div>
         </div>

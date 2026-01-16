@@ -226,7 +226,7 @@ export const FileUploadScreen = () => {
                       <div className="file-item">
                         <div className="file-item-content">
                           <div className="file-type-badge">
-                            <img 
+                            <img
                               src={slide.imagePath} 
                               alt={slide.name}
                               style={{

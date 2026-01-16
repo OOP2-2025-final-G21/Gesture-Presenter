@@ -128,18 +128,20 @@ export const useSlidesStore = create<SlidesStore>((set, get) => ({
       const loadedSlides: Slide[] = config.slides.map((slide: any) => ({
         id: slide.id,
         name: slide.title,
-        imagePath: `http://localhost:3001/presentations/${slide.image}`,
+        imagePath: `/presentations/${slide.image}`,  // 相対パスに修正
         uploadedAt: new Date(),
       }));
 
+      // 既存のisPlayingとcurrentSlideIndexを保持
+      const currentState = get();
       set({
         slides: loadedSlides,
         presentationTitle: config.title || 'プレゼンテーション',
-        currentSlideIndex: 0,
-        isPlaying: false,
+        // isPlayingとcurrentSlideIndexは保持（プレゼンテーション中に呼ばれても影響なし）
       });
 
       console.log('config.jsonからスライドを読み込みました:', loadedSlides);
+      console.log('プレゼンテーションタイトル:', config.title);
     } catch (error) {
       console.error('config.jsonの読み込みエラー:', error);
       // エラー時も空の状態で初期化

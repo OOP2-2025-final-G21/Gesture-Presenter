@@ -51,7 +51,7 @@ body {
 
 .icon-powerpoint-container {
   position: absolute;
-  left: -66px;
+  left: -12px;
   top: 40px;
   width: 80px;
   height: 80px;
@@ -69,7 +69,7 @@ body {
 
 .icon-image-container {
   position: absolute;
-  right: -54px;
+  right: 8px;
   top: 47px;
   width: 61px;
   height: 61px;
@@ -196,9 +196,9 @@ body {
 
 .drag-drop-subtext-visible {
   font-size: 16px;
-  color: #c5c5c5;
-  margin: 12px 0 0 0;
-  font-weight: 400;
+  color: #e7e7e7;
+  margin: 4px 0 0 0;
+  font-weight: 600;
   font-family: 'Inter', 'Noto Sans JP', sans-serif;
   transition: color 0.01s ease;
 }
@@ -293,6 +293,7 @@ body {
   align-items: center;
   justify-content: center;
   height: 100%;
+  font-weight: 700;
   color: #9ca3af;
 }
 
@@ -587,11 +588,6 @@ body {
 
 /* Responsive adjustments */
 @media (max-width: 1200px) {
-  .upload-section,
-  .file-list-section {
-    padding: 40px 32px;
-  }
-
   .upload-section h1,
   .file-list-section h2 {
     font-size: 28px;

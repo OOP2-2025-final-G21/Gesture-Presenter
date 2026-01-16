@@ -12,12 +12,19 @@ export const PresentationPage = () => {
     endPresentation,
     nextSlide,
     previousSlide,
+    presentationTitle,
+    loadFromConfig,
   } = useSlidesStore();
 
   const [showHeader, setShowHeader] = useState(true);
   const [pointer, setPointer] = useState<{ x: number; y: number } | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const pointerLastUpdateRef = useRef<number>(0);
+
+  // プレゼンテーション画面を開いた時にconfig.jsonを読み込む
+  useEffect(() => {
+    loadFromConfig();
+  }, []);
 
   // スライドがない、または再生中でない場合はホームにリダイレクト
   useEffect(() => {
@@ -153,7 +160,6 @@ export const PresentationPage = () => {
   }
 
   const currentSlide = slides[currentSlideIndex];
-  const slideTitle = currentSlide?.name.replace(/\.[^/.]+$/, '') || "プレゼンテーション";
 
   return (
     <div
@@ -185,7 +191,7 @@ export const PresentationPage = () => {
           {/* 中央：タイトル */}
           <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
             <p className="text-white text-[16px] font-medium whitespace-nowrap">
-              {slideTitle}
+              {presentationTitle || "プレゼンテーション"}
             </p>
           </div>
         </div>
