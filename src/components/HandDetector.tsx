@@ -1,6 +1,6 @@
 import React, { useEffect, useRef } from 'react';
 import useGestureDetector from '../hooks/useGestureDetector';
-import { Hands, Results } from '@mediapipe/hands';
+import { Hands, type Results } from '@mediapipe/hands';
 import { Camera } from '@mediapipe/camera_utils';
 
 interface GestureSettings {
